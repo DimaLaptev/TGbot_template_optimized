@@ -16,6 +16,7 @@ RUN pip --no-cache-dir install poetry
 
 COPY pyproject.toml poetry.lock /build/
 
+RUN poetry self add poetry-plugin-export
 RUN poetry export --without-hashes -f requirements.txt -o requirements.txt
 
 FROM non-root as app
