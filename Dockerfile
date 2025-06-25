@@ -30,11 +30,18 @@ ENV PYTHONFAULTHANDLER=1 \
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy project
-COPY tg_bot_template ./tg_bot_template/
+# Дополнительные зависимости для новой архитектуры
+RUN pip install --no-cache-dir pydantic-settings
 
-# run app
-ENTRYPOINT ["python", "-m"]
-CMD ["tg_bot_template.bot"]
+# copy new project structure
+COPY src ./src/
+
+# Настройка PYTHONPATH для модулей src
+ENV PYTHONPATH=/app/src
+
+# run new architecture app
+WORKDIR /app/src
+ENTRYPOINT ["python"]
+CMD ["main_with_pydantic.py"]
 
 FROM app

@@ -1,54 +1,39 @@
-version: '3.8'
+version: '3.1'
 
 volumes:
-  postgres_data:
-  redis_data:
+  pg_project:
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: tgbot_postgres
-    restart: unless-stopped
+  pg_db:
+    image: postgres:latest
+    restart: always
+    container_name: tg_bot_template_postgres
+    hostname: pg_db
+    env_file:
+      - .env
+    volumes:
+      - pg_project:/var/lib/postgresql/tg_bot_template
+    ports:
+      - "5432:5432"
+
+  redis_fsm:
+    image: redis:latest
+    hostname: redis_fsm
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+
+  tg_bot:
+    container_name: tg_bot_template
+    build: .
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: ${DATABASE_NAME:-tgbot_clean}
-      POSTGRES_USER: ${DATABASE_USER:-tgbot_user}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-tgbot_password_123}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "${DATABASE_PORT:-5432}:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-tgbot_user} -d ${DATABASE_NAME:-tgbot_clean}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: tgbot_redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Uncomment when we implement the bot interface
-  # tgbot:
-  #   build: .
-  #   container_name: tgbot_app
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./src:/app/src:ro
+      # Override hosts for Docker network
+      - DATABASE_HOST=pg_db
+      - REDIS_HOST=redis_fsm
+    restart: always
+    depends_on:
+      - pg_db
+      - redis_fsm

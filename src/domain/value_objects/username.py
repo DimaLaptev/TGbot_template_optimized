@@ -1,26 +1,38 @@
-"""Username value object."""
-import re
+"""
+Value Object для имени пользователя в Telegram.
+"""
 from dataclasses import dataclass
+from typing import Optional
+import re
 
 
 @dataclass(frozen=True)
 class Username:
-    """Username value object with validation."""
+    """
+    Объект-значение для имени пользователя в Telegram.
     
-    value: str
+    Обеспечивает валидацию формата username.
+    """
+    value: Optional[str]
     
     def __post_init__(self) -> None:
-        """Validate username."""
-        if not self.value:
-            raise ValueError("Username cannot be empty")
-        
-        if len(self.value) > 32:
-            raise ValueError("Username too long (max 32 characters)")
-        
-        # Telegram username pattern
-        if not re.match(r"^[a-zA-Z0-9_]+$", self.value):
-            raise ValueError("Username can only contain letters, numbers, and underscores")
+        if self.value is not None:
+            if not self._is_valid_username(self.value):
+                raise ValueError(f"Некорректный формат username: {self.value}")
+    
+    @staticmethod
+    def _is_valid_username(username: str) -> bool:
+        """Проверить валидность username согласно правилам Telegram."""
+        if len(username) < 5 or len(username) > 32:
+            return False
+        # Username может содержать только латинские буквы, цифры и подчеркивания
+        pattern = r'^[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]$'
+        return bool(re.match(pattern, username))
     
     def __str__(self) -> str:
-        """String representation."""
-        return self.value 
+        return self.value or "no_username"
+    
+    @property
+    def is_empty(self) -> bool:
+        """Проверить, пустое ли имя пользователя."""
+        return self.value is None 
