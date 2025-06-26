@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from domain.entities.user import User
 from domain.value_objects.user_id import UserId
+from domain.value_objects.username import Username
 
 
 class UserRepository(ABC):
@@ -22,21 +23,21 @@ class UserRepository(ABC):
         pass
     
     @abstractmethod
-    async def save(self, user: User) -> None:
-        """Сохранить пользователя."""
+    async def find_by_username(self, username: Username) -> Optional[User]:
+        """Найти пользователя по username."""
         pass
     
     @abstractmethod
-    async def exists(self, user_id: UserId) -> bool:
-        """Проверить существование пользователя."""
+    async def save(self, user: User) -> User:
+        """Сохранить пользователя и вернуть обновленную сущность."""
         pass
     
     @abstractmethod
-    async def find_all_ordered_by_taps(self) -> List[User]:
-        """Получить всех пользователей, отсортированных по количеству нажатий."""
+    async def delete(self, user_id: UserId) -> bool:
+        """Удалить пользователя. Возвращает True если удален."""
         pass
     
     @abstractmethod
-    async def get_total_taps(self) -> int:
-        """Получить общее количество нажатий всех пользователей."""
+    async def find_top_users(self, limit: int = 10) -> List[User]:
+        """Найти топ пользователей по количеству нажатий."""
         pass 

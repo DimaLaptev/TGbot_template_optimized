@@ -32,7 +32,7 @@ class DatabaseSettings(BaseSettings):
     @property
     def url(self) -> str:
         """Получить URL подключения к БД."""
-        return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
     
     class Config:
         env_prefix = ""
@@ -91,7 +91,7 @@ class AppSettings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Получить URL подключения к БД."""
-        return f"postgresql://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
     
     @property
     def redis_url(self) -> str:

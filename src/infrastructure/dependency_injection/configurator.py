@@ -13,6 +13,7 @@ from application.services.user_service_impl import UserServiceImpl
 
 # Infrastructure layer
 from infrastructure.database.repositories.user_repository_impl import UserRepositoryImpl
+from infrastructure.database.connection import DatabaseConnection
 from infrastructure.config.settings import AppSettings, get_settings
 
 
@@ -28,10 +29,12 @@ def configure_dependencies() -> None:
     settings = get_settings()
     container.register_singleton(AppSettings, settings)
     
+    # Database connection
+    db_connection = DatabaseConnection(settings)
+    container.register_singleton(DatabaseConnection, db_connection)
+    
     # Infrastructure layer - Repository implementations
-    # TODO: Заменить None на реальное подключение к БД
-    database_connection = None  # Будет создаваться в зависимости от настроек
-    user_repo_impl = UserRepositoryImpl(database_connection)
+    user_repo_impl = UserRepositoryImpl(db_connection)
     container.register_singleton(UserRepository, user_repo_impl)
     
     # Domain layer - Domain services
@@ -54,4 +57,9 @@ def get_user_service() -> UserService:
 
 def get_settings_from_container() -> AppSettings:
     """Получить настройки из DI контейнера."""
-    return container.get(AppSettings) 
+    return container.get(AppSettings)
+
+
+def get_database_connection() -> DatabaseConnection:
+    """Получить подключение к базе данных из DI контейнера."""
+    return container.get(DatabaseConnection) 
